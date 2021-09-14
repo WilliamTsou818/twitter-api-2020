@@ -1,4 +1,7 @@
 const adminService = require('../services/adminService')
+const userService = require('../services/userService')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const adminController = {
   getUsers: async (req, res) => {
@@ -36,6 +39,47 @@ const adminController = {
     }
 
     return res.status(200).json(data)
+  },
+
+  SignIn: async (req, res) => {
+    const { account, password } = req.body
+    // Check required data
+    if (!account || !password) {
+      return res.status(400).json({
+        status: 'error',
+        message: "Required fields didn't exist"
+      })
+    }
+
+    // Check whether the user exists by email
+    const admin = await userService.signIn(account, 'admin')
+
+    if (!admin) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'No such admin found' })
+    }
+    // Check if the user password is correct
+    if (!bcrypt.compareSync(password, user.password)) {
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'Incorrect password' })
+    }
+    // sign user token
+    const payload = { id: user.id }
+    const token = jwt.sign(payload, process.env.JWT_SECRET)
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Success to login',
+      token: token,
+      user: {
+        id: admin.id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role
+      }
+    })
   }
 }
 
