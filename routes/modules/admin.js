@@ -3,6 +3,9 @@ const router = express.Router()
 const adminController = require('../../controllers/adminController')
 const { authenticated, authenticatedRole } = require('../../middlewares/auth')
 
+// Admin login
+router.post('/signIn', adminController.SignIn)
+
 // Get all users except admin
 router.get('/users', authenticated, authenticatedRole('admin'), adminController.getUsers)
 
