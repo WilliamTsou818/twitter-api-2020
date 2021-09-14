@@ -4,7 +4,7 @@ const adminController = require('../../controllers/adminController')
 const { authenticated, authenticatedRole } = require('../../middlewares/auth')
 
 // Admin login
-router.post('/signIn', adminController.SignIn)
+router.post('/signin', adminController.SignIn)
 
 // Get all users except admin
 router.get('/users', authenticated, authenticatedRole('admin'), adminController.getUsers)
