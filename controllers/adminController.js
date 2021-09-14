@@ -60,13 +60,13 @@ const adminController = {
         .json({ status: 'error', message: 'No such admin found' })
     }
     // Check if the user password is correct
-    if (!bcrypt.compareSync(password, user.password)) {
+    if (!bcrypt.compareSync(password, admin.password)) {
       return res
         .status(400)
         .json({ status: 'error', message: 'Incorrect password' })
     }
     // sign user token
-    const payload = { id: user.id }
+    const payload = { id: admin.id }
     const token = jwt.sign(payload, process.env.JWT_SECRET)
 
     return res.status(200).json({
