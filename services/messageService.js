@@ -1,4 +1,4 @@
-const { Message, Room, Member, User } = require('../models')
+const { Message, Room, Member, User, Sequelize } = require('../models')
 
 const messageService = {
   postMessage: async (message) => {
@@ -15,8 +15,7 @@ const messageService = {
     })
   },
 
-  getMessages: async (room) => {
-    const { RoomId } = room
+  getMessages: async (RoomId) => {
     return await Message.findAll({
       where: { RoomId },
       include: [
@@ -27,8 +26,18 @@ const messageService = {
   },
 
   postPrivateRoom: async (targetUserId, currentUserId) => {
-    const name = `${currentUserId}-${targetUserId}`
-    return await Room.create({ name })
+    const [privateRoom] = await messageService.getPrivateRooms(
+      targetUserId,
+      currentUserId
+    )
+
+    if (!privateRoom) {
+      const name = `${currentUserId}-${targetUserId}`
+      const room = await Room.create({ name })
+      await messageService.postMember(room.id, targetUserId, currentUserId)
+      return room
+    }
+    return privateRoom
   },
 
   getPrivateRooms: async (targetUserId, currentUserId) => {
@@ -59,8 +68,7 @@ const messageService = {
     })
   },
 
-  postMember: async (room, targetUserId, currentUserId) => {
-    const { RoomId } = room
+  postMember: async (RoomId, targetUserId, currentUserId) => {
     await Member.bulkCreate([
       { RoomId, UserId: currentUserId },
       { RoomId, UserId: targetUserId }
@@ -68,7 +76,7 @@ const messageService = {
 
     return res.status(200).json({
       status: 'success',
-      message: 'A member has created'
+      message: 'Members has created'
     })
   }
 }
